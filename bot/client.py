@@ -13,8 +13,10 @@ from bot.schemas import (
     AddTorrentRequest,
     CategoryInfo,
     CategoryInfoResponse,
+    FilterTorrentState,
     LoginRequest,
     RemoveCategoriesRequest,
+    TorrentListRequest,
     TorrentListResponse,
 )
 from bot.settings import get_settings
@@ -47,8 +49,19 @@ class QbitWebClient:
             if resp.status != 200 or not resp.cookies:
                 raise AuthorizationFailedException
 
-    async def torrents_list(self) -> list[TorrentListResponse] | None:
+    async def torrents_list(
+            self,
+            state: FilterTorrentState | None = None,
+            category: str | None = None,
+            hashes:  list[str] | None = None,
+    ) -> list[TorrentListResponse] | None:
+        request_query_params = TorrentListRequest(
+            filter=state,
+            category=category,
+            hashes=hashes,
+        ).model_dump(exclude_none=True, by_alias=True)
         url = self.base_url / "torrents" / "info"
+        url = url.with_query(request_query_params)
         async with self.session.get(url) as resp:
             if resp.status != 200:
                 return None

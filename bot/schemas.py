@@ -1,4 +1,4 @@
-from enum import StrEnum
+from enum import StrEnum, auto
 from typing import Annotated
 
 from pydantic import (
@@ -73,7 +73,37 @@ class TorrentState(StrEnum):
     UNKNOWN = "unknown"
 
 
+class FilterTorrentState(StrEnum):
+    ALL = auto()
+    DOWNLOADING = auto()
+    COMPLETED = auto()
+    PAUSED = auto()
+    ACTIVE = auto()
+    INACTIVE = auto()
+    RESUMED = auto()
+    STALLED = auto()
+    STALLED_UPLOADING = auto()
+    STALLED_DOWNLOADING = auto()
+
+
 # https://github.com/qbittorrent/qBittorrent/wiki/Web-API-Documentation/87ec6b289ea5376b648e8cbb1373fb538da9f01d#get-torrent-list
+
+class TorrentListRequest(BaseModel):
+    filter: FilterTorrentState | None = None
+    category: str | None = None
+    hashes: list[str] | None = None
+
+    @field_serializer("hashes")
+    def serialize_hashes(
+            self,
+            hashes: list[str] | None,
+            _info: FieldSerializationInfo,
+    ):
+        if not hashes:
+            return None
+        return "|".join(hashes)
+
+
 class TorrentListResponse(BaseModel):
     name: str
     eta: int
