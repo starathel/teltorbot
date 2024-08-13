@@ -1,4 +1,5 @@
 from functools import lru_cache
+from typing import ClassVar
 
 from pydantic import AnyUrl
 from pydantic_settings import BaseSettings, SettingsConfigDict
@@ -12,7 +13,7 @@ class QbitWeb(BaseSettings):
 
 
 class Settings(BaseSettings):
-    model_config: SettingsConfigDict = SettingsConfigDict(
+    model_config: ClassVar[SettingsConfigDict] = SettingsConfigDict(
         env_file=".env",
         env_nested_delimiter="__",
     )
